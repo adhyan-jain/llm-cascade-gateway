@@ -92,6 +92,15 @@ routing:
         groq_1: llama-3.3-70b-versatile
         groq_2: llama-3.3-70b-versatile
         ollama_1: qwen2.5-coder:14b
+    coder:
+      chain: [gemini_1, gemini_2, openrouter_1, groq_1, groq_2, ollama_1]
+      models:
+        openrouter_1: anthropic/claude-3.5-sonnet
+        gemini_1: gemini-3.6-flash
+        gemini_2: gemini-3.6-flash
+        groq_1: llama-3.3-70b-versatile
+        groq_2: llama-3.3-70b-versatile
+        ollama_1: qwen2.5-coder:14b
     reasoning:
       chain: [openrouter_1, groq_1, ollama_1]
       models:
