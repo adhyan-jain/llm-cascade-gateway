@@ -91,6 +91,7 @@ async def shutdown_event():
 
 # OpenAI compatibility Chat Completion Endpoint
 @app.post("/v1/chat/completions")
+@app.post("/chat/completions")
 async def chat_completions(request: ChatCompletionRequest, raw_request: Request):
     request_id = str(uuid.uuid4())
     raw_body = await raw_request.json()
@@ -281,6 +282,7 @@ async def chat_completions(request: ChatCompletionRequest, raw_request: Request)
 
 # GET /v1/models
 @app.get("/v1/models")
+@app.get("/models")
 async def get_models():
     """
     Returns lists of models including configured aliases and all provider default models.
