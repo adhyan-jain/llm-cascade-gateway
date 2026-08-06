@@ -178,6 +178,16 @@ async def chat_completions(request: ChatCompletionRequest, raw_request: Request)
                 await response.aclose()
                 total_latency = (time.time() - start_time) * 1000.0
                 
+                # Write raw stream to debug log
+                try:
+                    raw_response_text = b"".join(buffer).decode("utf-8", errors="ignore")
+                    with open("logs/debug_stream.log", "a") as f:
+                        f.write(f"\n--- REQUEST {request_id} ---\n")
+                        f.write(f"Model: {request.model} | Provider: {provider.id}\n")
+                        f.write(f"Response:\n{raw_response_text}\n")
+                except Exception as log_ex:
+                    app_logger.error(f"Failed to write debug stream: {str(log_ex)}")
+
                 # Process buffer content for log analytics
                 try:
                     full_text = b"".join(buffer).decode("utf-8", errors="ignore")
