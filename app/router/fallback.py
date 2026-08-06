@@ -137,8 +137,11 @@ class Router:
         url = f"{provider.get_base_url().rstrip('/')}/chat/completions"
         headers = provider.get_headers()
 
-        # Update the model field in payload
+        # Update the model field in payload and strip tool parameters
+        # to prevent silent native tool calling failures in providers
         payload = {**request_data, "model": mapped_model}
+        payload.pop("tools", None)
+        payload.pop("tool_choice", None)
 
         start_time = time.time()
         
