@@ -1,0 +1,118 @@
+# AI Gateway Configuration File
+
+gateway:
+  host: "127.0.0.1"
+  port: 11435
+  load_balancing: "priority"  # Options: "round_robin", "lru", "priority" (strict order)
+  cooldown_duration_seconds: 30  # 30 seconds
+  health_check_interval_seconds: 30  # background health check interval
+  cache:
+    enabled: true
+    ttl_seconds: 300
+    max_size: 1000
+
+# Providers definition
+# Note: api_key_env refers to the environment variable loaded from .env
+providers:
+  - id: gemini_1
+    type: gemini
+    api_key_env: GEMINI_API_KEY_1
+    default_model: gemini-3.6-flash
+  - id: gemini_2
+    type: gemini
+    api_key_env: GEMINI_API_KEY_2
+    default_model: gemini-3.6-flash
+  - id: openrouter_1
+    type: openrouter
+    api_key_env: OPENROUTER_API_KEY_1
+    default_model: google/gemini-2.5-flash
+  - id: openrouter_2
+    type: openrouter
+    api_key_env: OPENROUTER_API_KEY_2
+    default_model: google/gemini-2.5-flash
+  - id: openrouter_3
+    type: openrouter
+    api_key_env: OPENROUTER_API_KEY_3
+    default_model: google/gemini-2.5-flash
+  - id: groq_1
+    type: groq
+    api_key_env: GROQ_API_KEY_1
+    default_model: llama-3.3-70b-versatile
+  - id: groq_2
+    type: groq
+    api_key_env: GROQ_API_KEY_2
+    default_model: llama-3.3-70b-versatile
+  - id: nvidia_1
+    type: nvidia
+    api_key_env: NVIDIA_API_KEY
+    default_model: nvidia/llama-3.1-nemotron-70b-instruct
+  - id: mistral_1
+    type: mistral
+    api_key_env: MISTRAL_API_KEY
+    default_model: mistral-large-latest
+  - id: ollama_1
+    type: ollama
+    url: "http://localhost:11434"
+    default_model: qwen2.5-coder:14b
+
+# Routing configurations
+routing:
+  # The default order to try if no model matches prefix-based routing or aliases.
+  # If load_balancing is "round_robin" or "lru", the order of all providers
+  # EXCEPT Ollama will be dynamically determined, and Ollama will be appended at the end.
+  # If load_balancing is "priority", the strict order below is used.
+  default_chain:
+    - gemini_1
+    - gemini_2
+    - openrouter_1
+    - openrouter_2
+    - openrouter_3
+    - groq_1
+    - groq_2
+    - nvidia_1
+    - mistral_1
+    - ollama_1
+
+  # Maps model name aliases to a specific provider chain and default model mapping
+  aliases:
+    coding-fast:
+      chain: [gemini_1, gemini_2, groq_1, groq_2, ollama_1]
+      models:
+        gemini_1: gemini-3.6-flash
+        gemini_2: gemini-3.6-flash
+        groq_1: llama-3.3-70b-versatile
+        groq_2: llama-3.3-70b-versatile
+        ollama_1: qwen2.5-coder:14b
+    coding-best:
+      chain: [gemini_1, gemini_2, openrouter_1, groq_1, groq_2, ollama_1]
+      models:
+        openrouter_1: anthropic/claude-3.5-sonnet
+        gemini_1: gemini-3.6-flash
+        gemini_2: gemini-3.6-flash
+        groq_1: llama-3.3-70b-versatile
+        groq_2: llama-3.3-70b-versatile
+        ollama_1: qwen2.5-coder:14b
+    reasoning:
+      chain: [openrouter_1, groq_1, ollama_1]
+      models:
+        openrouter_1: deepseek/deepseek-r1
+        groq_1: deepseek-r1-distill-llama-70b
+        ollama_1: qwen2.5-coder:14b
+    local:
+      chain: [ollama_1]
+      models:
+        ollama_1: qwen2.5-coder:14b
+
+  # Intelligent Routing prefix mapping.
+  # When a model name starts with a prefix, route it preferentially to the mapped provider first.
+  prefixes:
+    gpt:
+      primary_providers: [openrouter_1, openrouter_2, openrouter_3]
+    claude:
+      primary_providers: [openrouter_1, openrouter_2, openrouter_3]
+    gemini:
+      primary_providers: [gemini_1, gemini_2, openrouter_1]
+    deepseek:
+      primary_providers: [groq_1, groq_2, openrouter_1]
+    qwen:
+      primary_providers: [ollama_1, openrouter_1]

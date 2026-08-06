@@ -1,0 +1,13 @@
+[Unit]
+Description=Local AI Gateway
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/adhyan/Desktop/api_router/ai-gateway
+ExecStart=/home/adhyan/Desktop/api_router/ai-gateway/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 11435
+Restart=on-failure
+EnvironmentFile=/home/adhyan/Desktop/api_router/ai-gateway/.env
+
+[Install]
+WantedBy=default.target
